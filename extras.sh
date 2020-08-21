@@ -17,8 +17,10 @@ curl -s https://raw.githubusercontent.com/oneindex/script/master/gclone.sh | sud
 
 # MEGA api
 pip3 install mega.py
-cp /stuff/mega.py /usr/local/bin/smegma.py
-sudo chmod 777 /usr/local/bin/smegma.py
+cp /stuff/smegma /usr/local/bin/
+cp /stuff/smegma /home/
+sudo chmod 777 /usr/local/bin/smegma
+sudo chmod 777 /home/smegma
 
 # MEGA.NZ gclone script
 cp /stuff/mega /usr/local/bin/mega
