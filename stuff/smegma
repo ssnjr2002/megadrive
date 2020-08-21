@@ -1,37 +1,38 @@
-#!usr/bin/python3.6
+#! /usr/bin/python3
 
 import os
 import re
-import subprocess
+import sys
 import argparse
+import subprocess
 from mega import Mega
 
 parse = argparse.ArgumentParser(description='Mega to Drive Transfer Script',
-                                usage='smegma --url "https://mega.blah"' + \
+                                usage='mega --url "https://mega.blah"' + \
                                       '--tool _clone ' + \
                                       '--upload "remote:/path"' + \
-                                      '\nUse "smegma -h" for help',
+                                      '\nUse "mega -h" for help',
                                 epilog='Script by @firstwastaken')
 
-parse.add_argument('-url',
+parse.add_argument('--url',
                     metavar='https://mega.blah',
                     type=str,
                     help='mega public url',
                     required=True)
 
-parse.add_argument('-upload',
+parse.add_argument('--upload',
                     metavar='remote:/path',
                     type=str,
                     help='clone upload path with remote name',
                     required=True)
 
-parse.add_argument('-login',
+parse.add_argument('--login',
                     metavar='email:password',
                     type=str,
                     help='If specified, instead of using a temp account it ' + \
                          'uses your account')
 
-parse.add_argument('-tool',
+parse.add_argument('--tool',
                     type=str,
                     help='Name of the clonetool you are gonna use, for eg: ' + \
                          'rclone, gclone, fclone',
@@ -80,6 +81,11 @@ def dwld_to_dir():
 
 def upld_to_dir():
     print("Commencing upload...")
-    clone(f" move {dir_} {args.upload} -v --stats=10s --stats-one-line")
+    clone(f" move {dir_} {args.upload} -v --stats=1s --stats-one-line")
 
-dwld_to_dir(); upld_to_dir()
+try:
+    dwld_to_dir()
+except UnboundLocalError:
+    print('ERROR: File too large/quota exceeded.')
+
+upld_to_dir()
