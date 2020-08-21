@@ -15,6 +15,11 @@ apt-get install -y python \
 apt-get install -y systemd golang unzip
 curl -s https://raw.githubusercontent.com/oneindex/script/master/gclone.sh | sudo bash
 
+# MEGA api
+pip3 install mega.py
+cp /stuff/mega.py /usr/local/bin/smegma.py
+sudo chmod 777 /usr/local/bin/smegma.py
+
 # MEGA.NZ gclone script
 cp /stuff/mega /usr/local/bin/mega
 sudo chmod 777 /usr/local/bin/mega
