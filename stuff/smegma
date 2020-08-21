@@ -7,10 +7,10 @@ import argparse
 from mega import Mega
 
 parse = argparse.ArgumentParser(description='Mega to Drive Transfer Script',
-                                usage='mega --url "https://mega.blah"' + \
+                                usage='smegma --url "https://mega.blah"' + \
                                       '--tool _clone ' + \
                                       '--upload "remote:/path"' + \
-                                      '\nUse "mega -h" for help',
+                                      '\nUse "smegma -h" for help',
                                 epilog='Script by @firstwastaken')
 
 parse.add_argument('--url',
