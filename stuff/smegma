@@ -74,9 +74,12 @@ try:
 except FileExistsError:
     pass
   
-with os.chdir(dir_):
+def dwld_to_dir():
     print(f"Downloading: {args.url}")
-    dl_prefix.download_url(args.url)
+    os.chdir(dir_); dl_prefix.download_url(args.url)
 
-print("Commencing upload...")
-clone(f" move {dir_} {args.upload} -v --stats=10s --stats-one-line")
+def upld_to_dir():
+    print("Commencing upload...")
+    clone(f" move {dir_} {args.upload} -v --stats=10s --stats-one-line")
+
+dwld_to_dir(); upld_to_dir()
