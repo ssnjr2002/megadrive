@@ -56,7 +56,7 @@ def clone(command):
             if line != '':
                 sys.stdout.write('\r' + line)
                 sys.stdout.flush()
-        print('Done!')
+        print('\nDone!')
 
 def dwld_to_dir():
     print(f"Downloading: {args.url}")
