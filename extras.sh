@@ -13,7 +13,6 @@ apt-get install -y python \
 
 # Install gclone:
 apt-get install -y systemd golang unzip
-mkdir -p /home/.config/rclone/
 curl -s https://raw.githubusercontent.com/oneindex/script/master/gclone.sh | sudo bash
 
 # MEGA.NZ gclone script
