@@ -13,25 +13,25 @@ parse = argparse.ArgumentParser(description='Mega to Drive Transfer Script',
                                       '\nUse "smegma -h" for help',
                                 epilog='Script by @firstwastaken')
 
-parse.add_argument('--url',
+parse.add_argument('-url',
                     metavar='https://mega.blah',
                     type=str,
                     help='mega public url',
                     required=True)
 
-parse.add_argument('--upload',
+parse.add_argument('-upload',
                     metavar='remote:/path',
                     type=str,
                     help='clone upload path with remote name',
                     required=True)
 
-parse.add_argument('--login',
+parse.add_argument('-login',
                     metavar='email:password',
                     type=str,
                     help='If specified, instead of using a temp account it ' + \
                          'uses your account')
 
-parse.add_argument('--tool',
+parse.add_argument('-tool',
                     type=str,
                     help='Name of the clonetool you are gonna use, for eg: ' + \
                          'rclone, gclone, fclone',
