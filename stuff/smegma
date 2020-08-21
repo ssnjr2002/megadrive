@@ -44,6 +44,28 @@ args = parse.parse_args()
 pwd = os.environ.get("PWD")
 dir_ = f"{pwd}/mega/"
 
+def clone(command):
+    with subprocess.Popen(
+            args.tool + command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True) as proc:
+        print('Uploading...')
+        for line in iter(proc.stdout.readline, b''):
+            line = str(line).replace("b'", '').replace("\\n'", '')
+            if line != '':
+                sys.stdout.write('\r' + line)
+                sys.stdout.flush()
+        print('Done!')
+
+def dwld_to_dir():
+    print(f"Downloading: {args.url}")
+    os.chdir(dir_); dl_prefix.download_url(args.url)
+
+def upld_to_dir():
+    print("Commencing upload...")
+    clone(f" move {dir_} {args.upload} -v --stats=1s --stats-one-line")
+        
 if not args.login:
     dl_prefix = Mega().login()
 elif args.login:
@@ -55,33 +77,10 @@ elif args.login:
         print("Please provide login details as email:password")
         sys.exit(1)
 
-def clone(command):
-    with subprocess.Popen(
-            args.tool + command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True) as proc:
-        while True:
-            output = proc.stdout.readline().decode('UTF-8').strip()
-            if output != '':
-                sys.stdout.write(output)
-            if output == '' and proc.poll() is not None:
-                print("\n\nDone.")
-                break
-            sys.stdout.flush()
-
 try:
     os.makedirs(dir_)
 except FileExistsError:
     pass
-  
-def dwld_to_dir():
-    print(f"Downloading: {args.url}")
-    os.chdir(dir_); dl_prefix.download_url(args.url)
-
-def upld_to_dir():
-    print("Commencing upload...")
-    clone(f" move {dir_} {args.upload} -v --stats=1s --stats-one-line")
 
 try:
     dwld_to_dir()
