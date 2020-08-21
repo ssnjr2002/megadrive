@@ -1,0 +1,82 @@
+#!usr/bin/python3
+
+import os
+import re
+import subprocess
+import argparse
+from mega import Mega
+
+parse = argparse.ArgumentParser(description='Mega to Drive Transfer Script',
+                                usage='mega --url "https://mega.blah"' + \
+                                      '--tool _clone ' + \
+                                      '--upload "remote:/path"' + \
+                                      '\nUse "mega -h" for help',
+                                epilog='Script by @firstwastaken')
+
+parse.add_argument('--url',
+                    metavar='https://mega.blah',
+                    type=str,
+                    help='mega public url',
+                    required=True)
+
+parse.add_argument('--upload',
+                    metavar='remote:/path',
+                    type=str,
+                    help='clone upload path with remote name',
+                    required=True)
+
+parse.add_argument('--login',
+                    metavar='email:password',
+                    type=str,
+                    help='If specified, instead of using a temp account it ' + \
+                         'uses your account')
+
+parse.add_argument('--tool',
+                    type=str,
+                    help='Name of the clonetool you are gonna use, for eg: ' + \
+                         'rclone, gclone, fclone',
+                    required=True)
+
+mega = Mega()
+args = parse.parse_args()
+
+pwd = os.environ.get("PWD")
+dir_ = f"{pwd}/mega/"
+
+if not args.login:
+    dl_prefix = Mega().login()
+elif args.login:
+    if re.search(':', args.login):
+        mail_id = args.login.split(':')[0]
+        pass_ = args.login.split(':')[1]
+        dl_prefix = Mega().login(mail_id, pass_)
+    else:
+        print("Please provide login details as email:password")
+        sys.exit(1)
+
+def clone(command):
+    with subprocess.Popen(
+            args.tool + command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            shell=True) as proc:
+        while True:
+            output = proc.stdout.readline().decode('UTF-8').strip()
+            if output != '':
+                sys.stdout.write(output)
+            if output == '' and proc.poll() is not None:
+                print("Done")
+                break
+            sys.stdout.flush()
+
+try:
+    os.makedirs(dir_)
+except FileExistsError:
+    pass
+  
+with os.chdir(dir_):
+    print(f"Downloading: {args.url}")
+    dl_prefix.download_url(args.url)
+
+print("Commencing upload...")
+clone(f" move {dir_} {args.upload} -v --stats=10s --stats-one-line")
