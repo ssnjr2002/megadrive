@@ -95,4 +95,6 @@ echo "File Name: $file_name"
 echo "Hex: $hex"
 echo -e "Raw Hex: ${raw_hex:32:16}0000000000000000\n"
 
-wget -O $file_name $file_url && gclone move $file_name $CLONE_PATH -vv --stats=1m --stats-one-line
+wget -O $file_name $file_url &&
+echo "Commencing upload of $file_name to $CLONE_PATH" &&
+gclone move $file_name $CLONE_PATH -v --stats=10s --stats-one-line
