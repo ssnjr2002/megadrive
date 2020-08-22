@@ -3,9 +3,12 @@
 import os
 import re
 import sys
+import logging
 import argparse
 import subprocess
 from mega import Mega
+
+logging.basicConfig(level=logging.INFO)
 
 parse = argparse.ArgumentParser(description='Mega to Drive Transfer Script',
                                 usage='smegma -url "https://mega.blah"' + \
