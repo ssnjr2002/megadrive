@@ -743,9 +743,9 @@ class Mega:
                 block = chunk[i:i + 16]
                 if len(block) % 16:
                     block += b'\0' * (16 - (len(block) % 16))
+                    
                 mac_str = mac_encryptor.encrypt(encryptor.encrypt(block))
                 file_info = os.stat(temp_output_file.name)
-                
                 downloaded_size = file_info.st_size
                 progress = (downloaded_size / file_size) * 100
                 time_elapsed_one_exe = time.clock() - loop_time_per_exe_start
@@ -755,11 +755,9 @@ class Mega:
                 eta = round(
                     (file_size - file_info.st_size) / \
                     (one_by_time_elap * len(chunk)))
-
                 tot_time_elap = round(time.clock() - loop_time_elap_start)
 
                 eta_strf = time.strftime('%H:%M:%S', time.gmtime(eta))
-                
                 tot_time_elap_strf = time.strftime(
                     '%H:%M:%S', time.gmtime(tot_time_elap))
                 
