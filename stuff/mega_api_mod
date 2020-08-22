@@ -14,6 +14,7 @@ import binascii
 import tempfile
 import shutil
 import sys
+import time
 
 import requests
 from tenacity import retry, wait_exponential, retry_if_exception_type
@@ -685,10 +686,9 @@ class Mega:
             raise RequestError('File not accessible anymore')
         file_url = file_data['g']
         file_size = file_data['s']
-        file_size_gib = file_size / 1073741824
-
-        print(f'Direct URL: {file_url}')
-        print(f'File Size: {file_size_gib:.2f} GiB')
+        one_mebibyte = 1048576
+        file_size_gib = file_size / one_mebibyte
+        logger.info(f'Direct URL: {file_url}')
         
         attribs = base64_url_decode(file_data['at'])
         attribs = decrypt_attr(attribs, k)
@@ -697,6 +697,9 @@ class Mega:
             file_name = dest_filename
         else:
             file_name = attribs['n']
+            logger.info(f'File Name: {file_name}')
+
+        logger.info(f'File Size: {file_size_gib:.2f} MiB')
 
         input_file = requests.get(file_url, stream=True).raw
 
@@ -717,12 +720,15 @@ class Mega:
             mac_encryptor = AES.new(k_str, AES.MODE_CBC,
                                     mac_str.encode("utf8"))
             iv_str = a32_to_str([iv[0], iv[1], iv[0], iv[1]])
-
+            
+            loop_time_elap_start = time.clock()
+            
             for chunk_start, chunk_size in get_chunks(file_size):
+                loop_time_per_exe_start = time.clock()
                 chunk = input_file.read(chunk_size)
                 chunk = aes.decrypt(chunk)
                 temp_output_file.write(chunk)
-
+                
                 encryptor = AES.new(k_str, AES.MODE_CBC, iv_str)
                 for i in range(0, len(chunk) - 16, 16):
                     block = chunk[i:i + 16]
@@ -739,10 +745,39 @@ class Mega:
                     block += b'\0' * (16 - (len(block) % 16))
                 mac_str = mac_encryptor.encrypt(encryptor.encrypt(block))
                 file_info = os.stat(temp_output_file.name)
-                progress = (file_info.st_size / file_size) * 100
-                sys.stdout.write(f'\r{file_info.st_size} of {file_size}b | ' + \
-                    f'{progress:.2f}% downloaded ')
+                
+                downloaded_size = file_info.st_size
+                progress = (downloaded_size / file_size) * 100
+                time_elapsed_one_exe = time.clock() - loop_time_per_exe_start
+                one_by_time_elap = 1 / time_elapsed_one_exe
+                speed = (one_by_time_elap * len(chunk)) / one_mebibyte
+                
+                eta = round(
+                    (file_size - file_info.st_size) / \
+                    (one_by_time_elap * len(chunk)))
+
+                tot_time_elap = round(time.clock() - loop_time_elap_start)
+
+                eta_strf = time.strftime('%H:%M:%S', time.gmtime(eta))
+                
+                tot_time_elap_strf = time.strftime(
+                    '%H:%M:%S', time.gmtime(tot_time_elap))
+                
+                if tot_time_elap:
+                    avg_speed = (downloaded_size / tot_time_elap) / one_mebibyte
+                elif not tot_time_elap:
+                    avg_speed = 0
+
+                sys.stdout.write(
+                    f'\r{downloaded_size / one_mebibyte:.2f} of ' + \
+                    f'{(file_size / one_mebibyte):.2f} MiB ' + \
+                    f'({progress:.2f}%) downloaded | ' + \
+                    f'{speed:.2f} MiB/s / ' + \
+                    f'{avg_speed:.1f} MiB/s avg | ' + \
+                    f'TE: {tot_time_elap_strf} | ' + \
+                    f'ETA: {eta_strf} | ')
                 sys.stdout.flush()
+
             file_mac = str_to_a32(mac_str)
             # check mac integrity
             if (file_mac[0] ^ file_mac[1],
