@@ -91,5 +91,6 @@ except UnboundLocalError:
     print('ERROR: File too large/quota exceeded. ')
     if not args.login:
         print('Try logging in.')
+    sys.exit(1)
 
 upld_to_dir()
