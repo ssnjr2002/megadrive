@@ -188,6 +188,7 @@ class Mega:
                 logger.info(msg)
                 raise RuntimeError(msg)
             raise RequestError(int_resp)
+        logger.info('json_resp:', json_resp)
         return json_resp[0]
 
     def _parse_url(self, url):
@@ -721,7 +722,7 @@ class Mega:
                                     mac_str.encode("utf8"))
             iv_str = a32_to_str([iv[0], iv[1], iv[0], iv[1]])
             
-            loop_time_elap_start = time.clock()
+            loop_time_elap_start = time.time()
             
             for chunk_start, chunk_size in get_chunks(file_size):
                 loop_time_per_exe_start = time.clock()
@@ -751,29 +752,31 @@ class Mega:
                 time_elapsed_one_exe = time.clock() - loop_time_per_exe_start
                 one_by_time_elap = 1 / time_elapsed_one_exe
                 speed = (one_by_time_elap * len(chunk)) / one_mebibyte
-                
-                eta = round(
-                    (file_size - file_info.st_size) / \
-                    (one_by_time_elap * len(chunk)))
-                tot_time_elap = round(time.clock() - loop_time_elap_start)
 
-                eta_strf = time.strftime('%H:%M:%S', time.gmtime(eta))
+                tot_time_elap = round(time.time() - loop_time_elap_start)
+
                 tot_time_elap_strf = time.strftime(
                     '%H:%M:%S', time.gmtime(tot_time_elap))
                 
                 if tot_time_elap:
                     avg_speed = (downloaded_size / tot_time_elap) / one_mebibyte
+                    eta = round(
+                        (file_size - downloaded_size) / \
+                        (downloaded_size / tot_time_elap))
                 elif not tot_time_elap:
                     avg_speed = 0
+                    eta = 0
+
+                eta_strf = time.strftime('%H:%M:%S', time.gmtime(eta))
 
                 sys.stdout.write(
-                    f'\r{downloaded_size / one_mebibyte:.2f} of ' + \
+                    f'\r{downloaded_size / one_mebibyte:.1f} of ' + \
                     f'{(file_size / one_mebibyte):.2f} MiB ' + \
                     f'({progress:.2f}%) downloaded | ' + \
                     f'{speed:.2f} MiB/s / ' + \
                     f'{avg_speed:.1f} MiB/s avg | ' + \
                     f'TE: {tot_time_elap_strf} | ' + \
-                    f'ETA: {eta_strf} | ')
+                    f'ETA: {eta_strf} | {chunk_size}')
                 sys.stdout.flush()
 
             file_mac = str_to_a32(mac_str)
