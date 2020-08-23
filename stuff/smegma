@@ -36,8 +36,9 @@ parse.add_argument('-login',
                          'uses your account')
 
 parse.add_argument('-tool',
+                    metavar='g/f/rclone',
                     type=str,
-                    help='Name of the clonetool you are gonna use, for eg: ' + \
+                    help='Name of the clonetool you are gonna use : ' + \
                          'rclone, gclone, fclone',
                     required=True)
 
@@ -62,7 +63,6 @@ def clone(command):
         print('\nDone!')
 
 def dwld_to_dir():
-    print(f"Downloading: {args.url}")
     os.chdir(dir_); dl_prefix.download_url(args.url)
 
 def upld_to_dir():
